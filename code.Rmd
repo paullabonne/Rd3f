@@ -1,0 +1,298 @@
+---
+title: "Building dataframes from the economic calendar of Forex Factory"
+output: html_document
+date: "2023-02-02"
+---
+
+# Loading R packages
+```{r}
+library(dplyr)
+library(rvest)
+library(lubridate)
+library(stringr)
+library(zoo)
+library(magrittr)
+library(tidyr)
+library(RSelenium)
+```
+
+# Building a partial dataset excluding Forex Factory's details variables
+
+## Scrapping data from Forex Factory 
+```{r}
+date_range = seq(as.Date("2007-01-01"),as.Date("2022-02-06"), by = "days")
+
+df_FF = c()
+
+prev_month = as.yearmon(date_range[1])
+
+for (i in 1:length(date_range)) {
+  day_ref = day(date_range[i])
+  month_ref = str_to_lower(month(date_range[i], label = TRUE))
+  year_ref = year(date_range[i])
+  
+  date_ref = paste0(month_ref, day_ref, ".", year_ref)
+  
+  page_link = paste0("https://www.forexfactory.com/calendar?day=", date_ref)
+  
+  elements <- read_html(page_link) %>% 
+    html_elements(".calendar__table") %>% 
+    html_elements(".calendar__row--grey")
+  
+  currency <- elements %>%
+    html_elements(".currency") %>%
+    html_text2()
+  
+  event <- elements %>%
+    html_elements(".event") %>%
+    html_text2()
+  
+  forecast <- elements %>%
+    html_elements(".forecast") %>%
+    html_text2()
+  
+  observation <- elements %>%
+    html_elements(".actual") %>%
+    html_text2()
+  
+  previous_obs <- elements %>%
+    html_elements(".previous") %>%
+    html_text2()
+  
+  impact = elements %>%
+    html_elements(".calendar__impact-icon--screen") %>%
+    html_elements("[title]") %>%
+    html_attr("title")
+  
+  event_id = elements %>%
+    html_attr("data-eventid")
+  
+  df_day = tibble(currency,
+                  event,
+                  forecast,
+                  observation,
+                  previous_obs,
+                  impact,
+                  event_id) %>%
+    mutate(date = date_range[i])
+  
+  df_FF = rbind(df_FF,
+                df_day)
+  
+  # show progress
+  if (as.yearmon(date_range[i])!=prev_month) {
+    print(as.yearmon(date_range[i]))
+  }
+  
+  prev_month = as.yearmon(date_range[i])
+}
+
+save(df_FF, file = "df_FF.Rdata")
+```
+
+## Cleaning the data a little bit
+```{r}
+save(df_FF, file = "df_FF.Rdata")
+
+df_FF_clean = df_FF %>%
+  mutate(geo = NA,
+         geo = ifelse(currency == "AUD", "Australia", geo),
+         geo = ifelse(currency == "USD", "USA", geo),
+         geo = ifelse(currency == "CHF", "Switzerland", geo),
+         geo = ifelse(currency == "GBP", "UK", geo),
+         geo = ifelse(currency == "EUR", "Euro Area", geo),
+         geo = ifelse(currency == "CAD", "Canada", geo),
+         geo = ifelse(currency == "NZD", "New Zealand", geo),
+         geo = ifelse(currency == "CNY", "China", geo),
+         geo = ifelse(grepl("French", event), "France", geo),
+         geo = ifelse(grepl("Italian", event), "Italy", geo),
+         geo = ifelse(grepl("Spanish", event), "Spain", geo),
+         geo = ifelse(grepl("German", event), "German", geo)) %>%
+  gather(-date, -geo, -currency, -event, key = var, value = value)
+
+df_FF_clean %<>%
+  group_by(date,geo,currency,event,var) %>%
+  filter(n()>1)
+
+df_FF_clean %<>%
+  distinct() %>%
+  mutate(value = str_remove(value, "%"),
+         value = str_replace(value, "K", "000"),
+         value = str_replace(value, "M", "000000"),
+         value = str_replace(value, "B", "000000000"),
+         value = as.numeric(value)) %>%
+  spread(key = var, value = value) %>%
+  relocate(date, geo, currency) %>%
+  filter(!is.na(geo))
+
+save(df_FF_clean, file = "df_FF_clean.Rdata")
+```
+
+
+# Building a full dataset excluding Forex Factory's details variables
+
+## Installing the necessary python packages/libraries
+```{r, eval = FALSE}
+library(reticulate)
+# py_install("undetected_chromedriver", pip = TRUE)
+# py_install("selenium")
+``` 
+
+## Range of dates to build from
+```{r}
+date_range = seq(as.Date("2007-01-01"),as.Date("2022-02-06"), by = "days")
+day_ref = day(date_range)
+month_ref = str_to_lower(month(date_range, label = TRUE))
+year_ref = year(date_range)
+date_ref = paste0(month_ref, day_ref, ".", year_ref)
+```
+
+## Python code to save daily html pages with full details for each event
+```{python}
+import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# launching the webdriver
+options = webdriver.ChromeOptions() 
+options.add_argument("start-maximized")
+driver = uc.Chrome(options=options)
+
+# forex factor partial url
+ff_url = 'https://www.forexfactory.com/calendar?day='
+
+list_source = []
+
+for day in r.date_ref:
+  
+  # url of the day
+  ff_day_url = ff_url + day
+  
+  # go to the day url
+  driver.get(ff_day_url)
+  # time.sleep(2)
+
+  # find events
+  calandar_elem = driver.find_elements(By.CSS_SELECTOR, '[data-eventid].calendar_row')
+  calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, "[title='Open Detail']")
+  
+  # open details section for each event
+  while len(calandar_elem_open)>0:
+    for i in range(0,len(calandar_elem)):
+      event = calandar_elem[i].get_attribute("data-eventid")
+      
+      if len(event)>0:
+        css_sel = "[data-eventid='" + event + "'].calendar_row > .detail > [title='Open Detail']"
+        
+        details_elem = driver.find_element(By.CSS_SELECTOR, css_sel)
+        driver.execute_script("arguments[0].click();", details_elem) 
+        
+    time.sleep(5)
+    calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, ".calendar_row > .detail > [title='Open Detail']")
+
+  # store source html
+  list_source.append(driver.page_source)
+        
+# driver.quit()
+```
+
+## saving html source pages
+```{r}
+full_html_source = py$list_source
+save(full_html_source, file = "full_html_source.Rdata")
+```
+
+## Scrapping data from Forex Factory 
+```{r}
+load("full_html_source.Rdata")
+
+df_FF_full = c()
+
+prev_month = as.yearmon(date_range[1])
+
+for (i in 1:length(full_html_source)) {
+  
+  elements <- read_html(full_html_source[i]) %>% 
+    html_elements(".calendar__table") %>% 
+    html_elements(".calendar__row--grey")
+  
+  if (length(elements) > 0) {
+    
+    currency <- elements %>%
+      html_elements(".currency") %>%
+      html_text2()
+    
+    event <- elements %>%
+      html_elements(".event") %>%
+      html_text2()
+    
+    forecast <- elements %>%
+      html_elements(".forecast") %>%
+      html_text2()
+    
+    observation <- elements %>%
+      html_elements(".actual") %>%
+      html_text2()
+    
+    previous_obs <- elements %>%
+      html_elements(".previous") %>%
+      html_text2()
+    
+    event_id = elements %>%
+      html_attr("data-eventid")
+    
+    impact = elements %>%
+      html_elements(".calendar__impact-icon--screen") %>%
+      html_elements("[title]") %>%
+      html_attr("title")
+    
+    # getting the details
+    df_spec = c()
+    
+    for (id in event_id) {
+      specs = read_html(full_html_source[i]) %>%
+        html_element(paste0("[data-eventid='", id, "'].detail")) %>%
+        html_element("tbody") %>%
+        html_table() %>%
+        mutate(event_id = id)
+      
+      df_spec = rbind(df_spec, specs)
+    }
+    
+    df_spec %<>% 
+      spread(key = X1, value = X2)
+    ##
+    
+    df_day = tibble(currency,
+                    event,
+                    forecast,
+                    observation,
+                    previous_obs,
+                    impact,
+                    event_id) %>%
+      mutate(date = date_range[i]) %>%
+      full_join(df_spec, by = "event_id") %>%
+      gather(-date, -event_id, key = var, value = value)
+    
+    df_FF_full = rbind(df_FF_full,
+                       df_day)
+    
+  }
+  
+  # show progress
+  if (as.yearmon(date_range[i])!=prev_month) {
+    print(as.yearmon(date_range[i]))
+  }
+  
+  prev_month = as.yearmon(date_range[i])
+}
+
+df_FF_full %<>%
+  spread(key = var, value = value)
+
+save(df_FF_full, file = "df_FF_full.Rdata")
+```
+      
