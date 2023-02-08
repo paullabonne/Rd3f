@@ -1,0 +1,47 @@
+---
+title: "Analysis"
+output: html_document
+date: "2023-02-02"
+---
+
+# Loading R packages
+```{r}
+library(dplyr)
+library(magrittr)
+library(zoo)
+library(tidyr)
+library(kableExtra)
+```
+
+## 
+```{r}
+load("df_FF_clean.Rdata")
+
+df_sum = df_FF_clean %>%
+  select(geo, event, date, forecast) %>%
+  filter(!is.na(forecast)) %>%
+  group_by(geo, event) %>%
+  summarise(forecasts_available_from = as.yearmon(min(date)),
+            forecasts_available_to = as.yearmon(max(date)),
+            nb_forecasts = length(!is.na(forecast)))
+  
+df_sum %>%
+  group_by(geo) %>%
+  summarise(nb_event = length(unique(event))) %>%
+  arrange(-nb_event) %>%
+  kbl(caption = "Number of variables") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+df_sum %>%
+  mutate(event = tolower(event)) %>%
+  filter(grepl("price | infl | cpe | cpi | pce | ppi | pi | hpi | wage", event)) %>%
+  kbl(caption = "Price expectation data") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+df_sum %>%
+  mutate(event = tolower(event)) %>%
+  filter(grepl("employment | unemployment | claim", event)) %>%
+  kbl(caption = "Employment expectation data") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+

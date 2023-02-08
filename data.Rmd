@@ -21,7 +21,7 @@ library(reticulate)
 
 ## Scrapping data from Forex Factory 
 ```{r}
-date_range = seq(as.Date("2007-01-01"),as.Date("2022-02-06"), by = "days")
+date_range = seq(as.Date("2007-01-01"),as.Date("2023-02-07"), by = "days")
 
 df_FF = c()
 
@@ -91,45 +91,6 @@ for (i in 1:length(date_range)) {
 save(df_FF, file = "df_FF.Rdata")
 ```
 
-## Cleaning the data a little bit
-```{r}
-save(df_FF, file = "df_FF.Rdata")
-
-df_FF_clean = df_FF %>%
-  mutate(geo = NA,
-         geo = ifelse(currency == "AUD", "Australia", geo),
-         geo = ifelse(currency == "USD", "USA", geo),
-         geo = ifelse(currency == "CHF", "Switzerland", geo),
-         geo = ifelse(currency == "GBP", "UK", geo),
-         geo = ifelse(currency == "EUR", "Euro Area", geo),
-         geo = ifelse(currency == "CAD", "Canada", geo),
-         geo = ifelse(currency == "NZD", "New Zealand", geo),
-         geo = ifelse(currency == "CNY", "China", geo),
-         geo = ifelse(grepl("French", event), "France", geo),
-         geo = ifelse(grepl("Italian", event), "Italy", geo),
-         geo = ifelse(grepl("Spanish", event), "Spain", geo),
-         geo = ifelse(grepl("German", event), "German", geo)) %>%
-  gather(-date, -geo, -currency, -event, key = var, value = value)
-
-df_FF_clean %<>%
-  group_by(date,geo,currency,event,var) %>%
-  filter(n()>1)
-
-df_FF_clean %<>%
-  distinct() %>%
-  mutate(value = str_remove(value, "%"),
-         value = str_replace(value, "K", "000"),
-         value = str_replace(value, "M", "000000"),
-         value = str_replace(value, "B", "000000000"),
-         value = as.numeric(value)) %>%
-  spread(key = var, value = value) %>%
-  relocate(date, geo, currency) %>%
-  filter(!is.na(geo))
-
-save(df_FF_clean, file = "df_FF_clean.Rdata")
-```
-
-
 # Building a full dataset excluding Forex Factory's details variables
 
 ## Installing the necessary python packages/libraries
@@ -144,6 +105,7 @@ virtualenv_install("r-reticulate", "selenium", python = "/opt/homebrew/bin/pytho
 virtualenv_install("r-reticulate", "undetected_chromedriver", python = "/opt/homebrew/bin/python3")
 ``` 
 
+## Loading the necessary python packages/libraries
 ```{r}
 use_virtualenv("r-reticulate")
 selenium <- import("selenium")
@@ -152,7 +114,7 @@ undetected_chromedriver <- import("undetected_chromedriver")
 
 ## Range of dates to build from
 ```{r}
-date_range = seq(as.Date("2007-01-01"),as.Date("2022-04-07"), by = "days")
+date_range = seq(as.Date("2010-02-11"),as.Date("2023-02-07"), by = "days")
 day_ref = day(date_range)
 month_ref = str_to_lower(month(date_range, label = TRUE))
 year_ref = year(date_range)
@@ -167,17 +129,21 @@ from selenium.webdriver.common.by import By
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import pickle 
+
+try:
+  list_source = pickle.load(open('list_source.pkl','rb'))
+except:
+  list_source = {}
 
 # launching the webdriver
 options = webdriver.ChromeOptions() 
 options.add_argument("start-maximized")
 driver = uc.Chrome(options=options)
+driver.set_page_load_timeout(30000)
 
 # forex factor partial url
 ff_url = 'https://www.forexfactory.com/calendar?day='
-
-# list_source = []
-list_source = {}
 
 for day in r.date_ref:
   
@@ -202,7 +168,9 @@ for day in r.date_ref:
   # store source html
   time.sleep(0.5)
   list_source[day] = driver.page_source
-  
+
+with open('list_source.pkl', 'wb') as f:
+    pickle.dump(list_source, f)
 # driver.quit()
 ```
 

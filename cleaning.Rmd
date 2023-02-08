@@ -1,0 +1,56 @@
+# Loading R packages
+```{r}
+library(dplyr)
+library(lubridate)
+library(stringr)
+library(zoo)
+library(magrittr)
+library(tidyr)
+```
+
+## Cleaning the data 
+```{r}
+load("df_FF.Rdata")
+
+df_FF_clean = df_FF %>%
+  mutate(geo = NA,
+         geo = ifelse(currency == "AUD", "Australia", geo),
+         geo = ifelse(currency == "USD", "USA", geo),
+         geo = ifelse(currency == "CHF", "Switzerland", geo),
+         geo = ifelse(currency == "GBP", "UK", geo),
+         geo = ifelse(currency == "EUR", "Euro Area", geo),
+         geo = ifelse(currency == "CAD", "Canada", geo),
+         geo = ifelse(currency == "NZD", "New Zealand", geo),
+         geo = ifelse(currency == "CNY", "China", geo),
+         geo = ifelse(grepl("French", event), "France", geo),
+         geo = ifelse(grepl("Italian", event), "Italy", geo),
+         geo = ifelse(grepl("Spanish", event), "Spain", geo),
+         geo = ifelse(grepl("German", event), "German", geo)) %>%
+  filter(!is.na(geo))
+
+df_FF_clean %<>%
+  gather(-date, -geo, -currency, -event, -event_id, -impact, key = var, value = value) %>%
+  mutate(value = str_remove(value, "%"),
+         value = str_replace(value, "K", "000"),
+         value = str_replace(value, "M", "000000"),
+         value = str_replace(value, "B", "000000000"),
+         value = as.numeric(value)) %>%
+  spread(key = var, value = value) %>%
+  relocate(date, geo, currency)
+
+# keeping only data event (excluding speeches and meetings for instance)
+df_FF_clean %<>%
+  filter(!is.na(observation))
+
+# finding problematic events (duplicates) and dropping them to keep only single events (for now)
+df_FF_clean %<>%
+  mutate(index = 1:nrow(df_FF_clean)) %>%
+  group_by(date,geo,event) %>%
+  mutate(id_drop = ifelse(n()>1 & index == max(index), 1, 0)) %>%
+  # filter(n()>1) %>%
+  ungroup() %>%
+  filter(id_drop == 0) %>%
+  select(-id_drop,-index)
+
+save(df_FF_clean, file = "df_FF_clean.Rdata")
+```

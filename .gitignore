@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-^misc.Rmd
-^notes.txt
+misc.Rmd
+notes.txt
+data/
