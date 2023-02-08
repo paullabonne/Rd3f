@@ -14,6 +14,7 @@ library(zoo)
 library(magrittr)
 library(tidyr)
 library(RSelenium)
+library(reticulate)
 ```
 
 # Building a partial dataset excluding Forex Factory's details variables
@@ -133,14 +134,25 @@ save(df_FF_clean, file = "df_FF_clean.Rdata")
 
 ## Installing the necessary python packages/libraries
 ```{r, eval = FALSE}
-library(reticulate)
-# py_install("undetected_chromedriver", pip = TRUE)
-# py_install("selenium")
+# you might have to restart the R session after running these
+
+# py_config()
+# use_python("/opt/homebrew/bin/python3")
+
+virtualenv_create("r-reticulate")
+virtualenv_install("r-reticulate", "selenium", python = "/opt/homebrew/bin/python3")
+virtualenv_install("r-reticulate", "undetected_chromedriver", python = "/opt/homebrew/bin/python3")
 ``` 
+
+```{r}
+use_virtualenv("r-reticulate")
+selenium <- import("selenium")
+undetected_chromedriver <- import("undetected_chromedriver")
+```
 
 ## Range of dates to build from
 ```{r}
-date_range = seq(as.Date("2007-01-01"),as.Date("2022-02-06"), by = "days")
+date_range = seq(as.Date("2007-01-01"),as.Date("2022-04-07"), by = "days")
 day_ref = day(date_range)
 month_ref = str_to_lower(month(date_range, label = TRUE))
 year_ref = year(date_range)
@@ -164,7 +176,8 @@ driver = uc.Chrome(options=options)
 # forex factor partial url
 ff_url = 'https://www.forexfactory.com/calendar?day='
 
-list_source = []
+# list_source = []
+list_source = {}
 
 for day in r.date_ref:
   
@@ -173,29 +186,23 @@ for day in r.date_ref:
   
   # go to the day url
   driver.get(ff_day_url)
-  # time.sleep(2)
-
+  time.sleep(0.5)
+  
   # find events
-  calandar_elem = driver.find_elements(By.CSS_SELECTOR, '[data-eventid].calendar_row')
-  calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, "[title='Open Detail']")
+  calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, ".calendar_row > .detail > [title='Open Detail']")
   
   # open details section for each event
   while len(calandar_elem_open)>0:
-    for i in range(0,len(calandar_elem)):
-      event = calandar_elem[i].get_attribute("data-eventid")
-      
-      if len(event)>0:
-        css_sel = "[data-eventid='" + event + "'].calendar_row > .detail > [title='Open Detail']"
-        
-        details_elem = driver.find_element(By.CSS_SELECTOR, css_sel)
-        driver.execute_script("arguments[0].click();", details_elem) 
-        
-    time.sleep(5)
+    for i in range(0,len(calandar_elem_open)):
+      driver.execute_script("arguments[0].click();", calandar_elem_open[i]) 
+    
+    # find potentially remaining open events
     calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, ".calendar_row > .detail > [title='Open Detail']")
-
+    
   # store source html
-  list_source.append(driver.page_source)
-        
+  time.sleep(0.5)
+  list_source[day] = driver.page_source
+  
 # driver.quit()
 ```
 
@@ -215,7 +222,7 @@ prev_month = as.yearmon(date_range[1])
 
 for (i in 1:length(full_html_source)) {
   
-  elements <- read_html(full_html_source[i]) %>% 
+  elements <- read_html(full_html_source[[i]]) %>% 
     html_elements(".calendar__table") %>% 
     html_elements(".calendar__row--grey")
   
@@ -253,7 +260,7 @@ for (i in 1:length(full_html_source)) {
     df_spec = c()
     
     for (id in event_id) {
-      specs = read_html(full_html_source[i]) %>%
+      specs = read_html(full_html_source[[i]]) %>%
         html_element(paste0("[data-eventid='", id, "'].detail")) %>%
         html_element("tbody") %>%
         html_table() %>%
