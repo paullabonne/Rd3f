@@ -30,10 +30,9 @@ ggplot(data = df,
        aes(
          x = target,
          y = forecast,
-         colour = geo,
-         alpha = 0.5
+         colour = geo
        )) +
-  geom_point() +
+  geom_point(alpha = 0.5) +
   facet_wrap( ~ event, scales = "free_y", ncol = 3)
 ```
 
@@ -50,10 +49,9 @@ ggplot(data = df,
        aes(
          x = target,
          y = forecast,
-         colour = geo,
-         alpha = 0.5
+         colour = geo
        )) +
-  geom_point(size = 0.3) +
+  geom_point(alpha = 0.5) +
   facet_wrap( ~ event, scales = "free_y", ncol = 3)
 ```
 
@@ -69,10 +67,9 @@ ggplot(data = df,
        aes(
          x = target,
          y = forecast,
-         colour = geo,
-         alpha = 0.5
+         colour = geo
        )) +
-  geom_point() +
+  geom_point(alpha = 0.5) +
   facet_wrap( ~ event, scales = "free_y", ncol = 3)
 ```
 
@@ -88,9 +85,8 @@ ggplot(data = df,
        aes(
          x = target,
          y = forecast,
-         colour = geo,
-         alpha = 0.5
+         colour = geo
        )) +
-  geom_point() +
+  geom_point(alpha = 0.5) +
   facet_wrap( ~ event, scales = "free_y", ncol = 3)
 ```
