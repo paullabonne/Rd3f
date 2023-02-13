@@ -16,7 +16,8 @@ load("data/df_FF_full.Rdata")
 ## Cleaning the data 
 ```{r}
 df_FF_clean = df_FF_full %>%
-  mutate(geo = NA,
+  mutate(event = tolower(event),
+         geo = NA,
          geo = ifelse(currency == "AUD", "Australia", geo),
          geo = ifelse(currency == "USD", "USA", geo),
          geo = ifelse(currency == "CHF", "Switzerland", geo),
@@ -58,6 +59,14 @@ df_FF_clean %<>%
   filter(id_drop == 0) %>%
   select(-id_drop,-index)
 
+# creating forecast error variable
+df_FF_clean %<>%
+  mutate(error = forecast - observation)
+
+# creating change variable
+df_FF_clean %<>%
+  mutate(change = observation - previous_obs)
+
 save(df_FF_clean, file = "data/df_FF_clean.Rdata")
 ```
 
@@ -82,13 +91,13 @@ df_FF_clean %<>%
                           freq == "quarterly", as.character(as.yearqtr(date)), target),
          target = ifelse(!grepl("days", Frequency) &
                           (grepl("after", Frequency) | grepl("following", Frequency)) &
-                          freq == "quarterly", as.character(as.yearqtr(date)-1), target),
+                          freq == "quarterly", as.character(as.yearqtr(date)-1/4), target),
          target = ifelse(!grepl("days", Frequency) &
                           grepl("current", Frequency) &
                           freq == "monthly", as.character(as.yearmon(date)), target),
          target = ifelse(!grepl("days", Frequency) &
                           (grepl("after", Frequency) | grepl("following", Frequency)) &
-                          freq == "monthly", as.character(as.yearmon(date)-1), target),
+                          freq == "monthly", as.character(as.yearmon(date)-1/12), target),
          target = ifelse(!grepl("days", Frequency) &
                           (grepl("after", Frequency)) &
                           freq == "weekly", as.character(week(date)-1), target),
@@ -99,20 +108,21 @@ df_FF_clean %<>%
          #monthly
          target = ifelse((grepl("after", Frequency) | grepl("following", Frequency)) &
                           freq == "monthly" & !is.na(lag) & lag <= 90,
-                         as.character(as.yearmon(date)-3), target),
+                         as.character(as.yearmon(date)-3/12), target),
          target = ifelse((grepl("after", Frequency) | grepl("following", Frequency)) &
                           freq == "monthly" & !is.na(lag) & lag <= 60,
-                         as.character(as.yearmon(date)-2), target),
+                         as.character(as.yearmon(date)-2/12), target),
          target = ifelse((grepl("after", Frequency) | grepl("following", Frequency)) &
                           freq == "monthly" & !is.na(lag) & lag <= 30,
-                         as.character(as.yearmon(date)-1), target),
+                         as.character(as.yearmon(date)-1/12), target),
          #quarterly
          target = ifelse((grepl("after", Frequency) | grepl("following", Frequency)) &
                           freq == "quarterly" & !is.na(lag) & lag <= 180,
-                         as.character(as.yearqtr(date)-2), target),
+                         as.character(as.yearqtr(date)-2/4), target),
          target = ifelse((grepl("after", Frequency) | grepl("following", Frequency)) &
                           freq == "quarterly" & !is.na(lag) & lag <= 90,
-                         as.character(as.yearqtr(date)-1), target))
+                         as.character(as.yearqtr(date)-1/4), target)) %>%
+  select(-lag)
 
 df_FF_clean %>%
   select(Frequency, event, target, freq, geo) %>%
@@ -122,6 +132,16 @@ df_FF_clean %>%
 # filter(!grepl("days", Frequency) &
 #                           (grepl("after", Frequency)) &
 #                           freq == "weekly")
+
+save(df_FF_clean, file = "data/df_FF_clean.Rdata")
+```
+
+## adding inflation and employment indicator
+```{r}
+df_FF_clean %<>%
+  mutate(type = NA,
+         type = ifelse(grepl("price | infl | cpe | cpi | pce | ppi | pi | hpi | wage", event), "inflation", type),
+         type = ifelse(grepl("employment | unemployment | claim", event), "employment", type))
 
 save(df_FF_clean, file = "data/df_FF_clean.Rdata")
 ```

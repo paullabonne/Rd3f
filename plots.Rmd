@@ -1,0 +1,96 @@
+---
+title: "Graphs"
+output: html_document
+date: "2023-02-02"
+---
+
+# Loading R packages
+```{r}
+library(dplyr)
+library(magrittr)
+library(zoo)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+load("data/df_FF_clean.Rdata")
+```
+
+# inflation
+```{r}
+df = df_FF_clean %>%
+  filter(type == "inflation",
+         # grepl("cpi", event),
+         freq == "monthly") %>%
+  mutate(target = as.yearmon(target)) %>%
+  arrange(geo, target)
+
+ggplot(data = df,
+       aes(
+         x = target,
+         y = forecast,
+         colour = geo,
+         alpha = 0.5
+       )) +
+  geom_point() +
+  facet_wrap( ~ event, scales = "free_y", ncol = 3)
+```
+
+# employment
+```{r}
+df = df_FF_clean %>%
+  filter(type == "employment",
+         # grepl("cpi", event),
+         freq == "monthly") %>%
+  mutate(target = as.yearmon(target)) %>%
+  arrange(geo, target)
+
+ggplot(data = df,
+       aes(
+         x = target,
+         y = forecast,
+         colour = geo,
+         alpha = 0.5
+       )) +
+  geom_point(size = 0.3) +
+  facet_wrap( ~ event, scales = "free_y", ncol = 3)
+```
+
+# gdp
+```{r}
+df = df_FF_clean %>%
+  filter(grepl("gdp", event),
+         freq == "quarterly") %>%
+  mutate(target = as.yearqtr(target)) %>%
+  arrange(geo, target)
+
+ggplot(data = df,
+       aes(
+         x = target,
+         y = forecast,
+         colour = geo,
+         alpha = 0.5
+       )) +
+  geom_point() +
+  facet_wrap( ~ event, scales = "free_y", ncol = 3)
+```
+
+# gdp
+```{r}
+df = df_FF_clean %>%
+  filter(grepl("consumer", event),
+         freq == "monthly") %>%
+  mutate(target = as.yearmon(target)) %>%
+  arrange(geo, target)
+
+ggplot(data = df,
+       aes(
+         x = target,
+         y = forecast,
+         colour = geo,
+         alpha = 0.5
+       )) +
+  geom_point() +
+  facet_wrap( ~ event, scales = "free_y", ncol = 3)
+```

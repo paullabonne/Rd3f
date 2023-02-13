@@ -18,12 +18,13 @@ library(kableExtra)
 load("data/df_FF_clean.Rdata")
 
 df_sum = df_FF_clean %>%
-  select(geo, event, date, forecast) %>%
+  select(geo, event, date, forecast, type) %>%
   filter(!is.na(forecast)) %>%
   group_by(geo, event) %>%
   summarise(forecasts_available_from = as.yearmon(min(date)),
             forecasts_available_to = as.yearmon(max(date)),
-            nb_forecasts = length(!is.na(forecast)))
+            nb_forecasts = length(!is.na(forecast)),
+            type = unique(type))
   
 df_sum %>%
   group_by(geo) %>%
@@ -33,14 +34,12 @@ df_sum %>%
   kable_classic(full_width = F, html_font = "Cambria")
 
 df_sum %>%
-  mutate(event = tolower(event)) %>%
-  filter(grepl("price | infl | cpe | cpi | pce | ppi | pi | hpi | wage", event)) %>%
+  filter(type == "inflation") %>%
   kbl(caption = "Price expectation data") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 
 df_sum %>%
-  mutate(event = tolower(event)) %>%
-  filter(grepl("employment | unemployment | claim", event)) %>%
+  filter(type == "employment") %>%
   kbl(caption = "Employment expectation data") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 ```
