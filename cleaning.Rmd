@@ -31,10 +31,11 @@ df_FF_clean = df_FF_full %>%
          geo = ifelse(grepl("Spanish", event), "Spain", geo),
          geo = ifelse(grepl("German", event), "German", geo)) %>%
   filter(!is.na(geo)) %>%
-  select(date, geo, currency, event, event_id, forecast, observation, previous_obs, impact, Description, `FF Notes`, `FF Notice`, Frequency, Measures)
+  select(date, geo, currency, event, event_id, forecast, observation, previous_obs, impact, release_time, Description, `FF Notes`, `FF Notice`, Frequency, Measures)
 
+# cleaning numbers
 df_FF_clean %<>%
-  gather(-date, -geo, -currency, -event, -event_id, -impact,
+  gather(-date, -geo, -currency, -event, -event_id, -impact, -release_time,
          -Description, -`FF Notes`, -`FF Notice`, -Frequency, -Measures,
          key = var, value = value) %>%
   mutate(value = str_remove(value, "%"),
@@ -43,7 +44,7 @@ df_FF_clean %<>%
          value = str_replace(value, "B", "000000000"),
          value = as.numeric(value)) %>%
   spread(key = var, value = value) %>%
-  relocate(date, geo, currency)
+  relocate(date, release_time, geo, currency)
 
 # keeping only data event (excluding speeches and meetings for instance)
 df_FF_clean %<>%
@@ -142,6 +143,14 @@ df_FF_clean %<>%
   mutate(type = NA,
          type = ifelse(grepl("price | infl | cpe | cpi | pce | ppi | pi | hpi | wage", event), "inflation", type),
          type = ifelse(grepl("employment | unemployment | claim", event), "employment", type))
+
+save(df_FF_clean, file = "data/df_FF_clean.Rdata")
+```
+
+## sort by release_time
+```{r}
+df_FF_clean %<>%
+  arrange(release_time)
 
 save(df_FF_clean, file = "data/df_FF_clean.Rdata")
 ```
