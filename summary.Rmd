@@ -1,5 +1,5 @@
 ---
-title: "Analysis"
+title: "Summary"
 output: html_document
 date: "2023-02-02"
 ---
@@ -15,7 +15,7 @@ library(kableExtra)
 
 ## 
 ```{r}
-load("df_FF_clean.Rdata")
+load("data/df_FF_clean.Rdata")
 
 df_sum = df_FF_clean %>%
   select(geo, event, date, forecast) %>%

@@ -19,7 +19,7 @@ library(reticulate)
 
 # Building a partial dataset excluding Forex Factory's details variables
 
-## Scrapping data from Forex Factory 
+## Scrapping data from Forex Factory
 ```{r}
 date_range = seq(as.Date("2007-01-01"),as.Date("2023-02-07"), by = "days")
 
@@ -88,7 +88,7 @@ for (i in 1:length(date_range)) {
   prev_month = as.yearmon(date_range[i])
 }
 
-save(df_FF, file = "df_FF.Rdata")
+save(df_FF, file = "data/df_FF.Rdata")
 ```
 
 # Building a full dataset excluding Forex Factory's details variables
@@ -103,7 +103,7 @@ save(df_FF, file = "df_FF.Rdata")
 virtualenv_create("r-reticulate")
 virtualenv_install("r-reticulate", "selenium", python = "/opt/homebrew/bin/python3")
 virtualenv_install("r-reticulate", "undetected_chromedriver", python = "/opt/homebrew/bin/python3")
-``` 
+```
 
 ## Loading the necessary python packages/libraries
 ```{r}
@@ -114,7 +114,7 @@ undetected_chromedriver <- import("undetected_chromedriver")
 
 ## Range of dates to build from
 ```{r}
-date_range = seq(as.Date("2010-02-11"),as.Date("2023-02-07"), by = "days")
+date_range = seq(as.Date("2007-01-01"),as.Date("2023-02-07"), by = "days")
 day_ref = day(date_range)
 month_ref = str_to_lower(month(date_range, label = TRUE))
 year_ref = year(date_range)
@@ -130,9 +130,10 @@ import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pickle 
+import numpy as np
 
 try:
-  list_source = pickle.load(open('list_source.pkl','rb'))
+  list_source = np.load('data/list_source.npy', allow_pickle='TRUE').item()
 except:
   list_source = {}
 
@@ -169,20 +170,20 @@ for day in r.date_ref:
   time.sleep(0.5)
   list_source[day] = driver.page_source
 
-with open('list_source.pkl', 'wb') as f:
-    pickle.dump(list_source, f)
+np.save('data/list_source.npy', list_source)
+
 # driver.quit()
 ```
 
 ## saving html source pages
 ```{r}
 full_html_source = py$list_source
-save(full_html_source, file = "full_html_source.Rdata")
+save(full_html_source, file = "data/full_html_source.Rdata")
 ```
 
-## Scrapping data from Forex Factory 
+## Scrapping data from Forex Factory
 ```{r}
-load("full_html_source.Rdata")
+# load("data/full_html_source.Rdata")
 
 df_FF_full = c()
 
@@ -268,6 +269,5 @@ for (i in 1:length(full_html_source)) {
 df_FF_full %<>%
   spread(key = var, value = value)
 
-save(df_FF_full, file = "df_FF_full.Rdata")
+save(df_FF_full, file = "data/df_FF_full.Rdata")
 ```
-      
