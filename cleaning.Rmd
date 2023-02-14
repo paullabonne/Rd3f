@@ -26,10 +26,14 @@ df_FF_clean = df_FF_full %>%
          geo = ifelse(currency == "CAD", "Canada", geo),
          geo = ifelse(currency == "NZD", "New Zealand", geo),
          geo = ifelse(currency == "CNY", "China", geo),
-         geo = ifelse(grepl("French", event), "France", geo),
-         geo = ifelse(grepl("Italian", event), "Italy", geo),
-         geo = ifelse(grepl("Spanish", event), "Spain", geo),
-         geo = ifelse(grepl("German", event), "German", geo)) %>%
+         geo = ifelse(grepl("french", event), "France", geo),
+         geo = ifelse(grepl("italian", event), "Italy", geo),
+         geo = ifelse(grepl("spanish", event), "Spain", geo),
+         geo = ifelse(grepl("german", event), "Germany", geo),
+         event = str_remove(event, "french "),
+         event = str_remove(event, "italian "),
+         event = str_remove(event, "german "),
+         event = str_remove(event, "spanish ")) %>%
   filter(!is.na(geo)) %>%
   select(date, geo, currency, event, event_id, forecast, observation, previous_obs, impact, release_time, Description, `FF Notes`, `FF Notice`, Frequency, Measures)
 

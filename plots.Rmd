@@ -19,6 +19,7 @@ load("data/df_FF_clean.Rdata")
 
 # inflation
 ```{r}
+## forecast
 df = df_FF_clean %>%
   filter(type == "inflation",
          # grepl("cpi", event),
@@ -27,17 +28,53 @@ df = df_FF_clean %>%
   arrange(geo, target)
 
 ggplot(data = df,
-       aes(
-         x = target,
-         y = forecast,
-         colour = geo
-       )) +
+       aes(x = target,
+           y = forecast,
+           colour = geo)) +
+  ggtitle("forecast") +
   geom_point(alpha = 0.5) +
-  facet_wrap( ~ event, scales = "free_y", ncol = 3)
+  facet_wrap(~ event, scales = "free_y", ncol = 3) +
+  scale_x_yearmon(format = "%y", n = 10)
+
+## error
+df = df_FF_clean %>%
+  filter(type == "inflation",
+         # grepl("cpi", event),
+         freq == "monthly") %>%
+  mutate(target = as.yearmon(target)) %>%
+  arrange(geo, target)
+
+ggplot(data = df,
+       aes(x = target,
+           y = error,
+           colour = geo)) +
+  ggtitle("error") +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~ event, scales = "free_y", ncol = 3) +
+  scale_x_yearmon(format = "%y", n = 10)
 ```
 
 # employment
 ```{r}
+## forecast
+df = df_FF_clean %>%
+  filter(type == "employment",
+         # grepl("cpi", event),
+         freq == "monthly") %>%
+  mutate(target = as.yearmon(target)) %>%
+  arrange(geo, target)
+
+
+ggplot(data = df,
+       aes(x = target,
+           y = forecast,
+           colour = geo)) +
+  ggtitle("forecast") +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~ event, scales = "free_y", ncol = 3) +
+  scale_x_yearmon(format = "%y", n = 10)
+
+## error
 df = df_FF_clean %>%
   filter(type == "employment",
          # grepl("cpi", event),
@@ -46,17 +83,18 @@ df = df_FF_clean %>%
   arrange(geo, target)
 
 ggplot(data = df,
-       aes(
-         x = target,
-         y = forecast,
-         colour = geo
-       )) +
+       aes(x = target,
+           y = error,
+           colour = geo)) +
+  ggtitle("error") +
   geom_point(alpha = 0.5) +
-  facet_wrap( ~ event, scales = "free_y", ncol = 3)
+  facet_wrap(~ event, scales = "free_y", ncol = 3) +
+  scale_x_yearmon(format = "%y", n = 10)
 ```
 
 # gdp
 ```{r}
+## forecast
 df = df_FF_clean %>%
   filter(grepl("gdp", event),
          freq == "quarterly") %>%
@@ -64,17 +102,34 @@ df = df_FF_clean %>%
   arrange(geo, target)
 
 ggplot(data = df,
-       aes(
-         x = target,
-         y = forecast,
-         colour = geo
-       )) +
+       aes(x = target,
+           y = forecast,
+           colour = geo)) +
+  ggtitle("forecast") +
   geom_point(alpha = 0.5) +
-  facet_wrap( ~ event, scales = "free_y", ncol = 3)
+  facet_wrap(~ event, scales = "free_y", ncol = 3) +
+  scale_x_yearmon(format = "%y", n = 10)
+
+## error
+df = df_FF_clean %>%
+  filter(grepl("gdp", event),
+         freq == "quarterly") %>%
+  mutate(target = as.yearqtr(target)) %>%
+  arrange(geo, target)
+
+ggplot(data = df,
+       aes(x = target,
+           y = error,
+           colour = geo)) +
+  ggtitle("error") +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~ event, scales = "free_y", ncol = 3) +
+  scale_x_yearmon(format = "%y", n = 10)
 ```
 
 # gdp
 ```{r}
+### forecast
 df = df_FF_clean %>%
   filter(grepl("consumer", event),
          freq == "monthly") %>%
@@ -82,11 +137,27 @@ df = df_FF_clean %>%
   arrange(geo, target)
 
 ggplot(data = df,
-       aes(
-         x = target,
-         y = forecast,
-         colour = geo
-       )) +
+       aes(x = target,
+           y = forecast,
+           colour = geo)) +
+  ggtitle("forecast") +
   geom_point(alpha = 0.5) +
-  facet_wrap( ~ event, scales = "free_y", ncol = 3)
+  facet_wrap(~ event, scales = "free_y", ncol = 3) +
+  scale_x_yearmon(format = "%y", n = 10)
+
+### error
+df = df_FF_clean %>%
+  filter(grepl("consumer", event),
+         freq == "monthly") %>%
+  mutate(target = as.yearmon(target)) %>%
+  arrange(geo, target)
+
+ggplot(data = df,
+       aes(x = target,
+           y = error,
+           colour = geo)) +
+  ggtitle("error") +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~ event, scales = "free_y", ncol = 3) +
+  scale_x_yearmon(format = "%y", n = 10)
 ```
