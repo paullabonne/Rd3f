@@ -134,49 +134,51 @@ import numpy as np
 
 try:
   list_source = np.load('data/list_source.npy', allow_pickle='TRUE').item()
-  except:
-    list_source = {}
+except:
+  list_source = {}
     
-    # launching the webdriver
-    options = webdriver.ChromeOptions() 
-    options.add_argument("start-maximized")
-    driver = uc.Chrome(options=options)
-    driver.set_page_load_timeout(30000)
+# launching the webdriver
+options = webdriver.ChromeOptions() 
+options.add_argument("start-maximized")
+driver = uc.Chrome(options=options)
+driver.set_page_load_timeout(30000)
     
-    # forex factor partial url
-    ff_url = 'https://www.forexfactory.com/calendar?day='
+# forex factor partial url
+ff_url = 'https://www.forexfactory.com/calendar?day='
     
-    for day in r.date_ref:
+for day in r.date_ref:
       
-      # url of the day
-      ff_day_url = ff_url + day
+  # url of the day
+  ff_day_url = ff_url + day
       
-      # go to the day url
-      driver.get(ff_day_url)
-      time.sleep(0.5)
+  # go to the day url
+  driver.get(ff_day_url)
+  time.sleep(0.5)
       
-      # find events
-      calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, ".calendar_row > .detail > [title='Open Detail']")
+  # find events
+  calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, ".calendar_row > .detail > [title='Open Detail']")
       
-      # open details section for each event
-      while len(calandar_elem_open)>0:
-        for i in range(0,len(calandar_elem_open)):
-          driver.execute_script("arguments[0].click();", calandar_elem_open[i]) 
+  # open details section for each event
+  while len(calandar_elem_open)>0:
+    
+    for i in range(0,len(calandar_elem_open)):
+      driver.execute_script("arguments[0].click();", calandar_elem_open[i]) 
+    
+    # find potentially remaining open events
+    calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, ".calendar_row > .detail > [title='Open Detail']")
+    
+  # store source html
+  time.sleep(0.5)
+  list_source[day] = driver.page_source
           
-          # find potentially remaining open events
-          calandar_elem_open = driver.find_elements(By.CSS_SELECTOR, ".calendar_row > .detail > [title='Open Detail']")
-          
-          # store source html
-          time.sleep(0.5)
-          list_source[day] = driver.page_source
-          
-          np.save('data/list_source.npy', list_source)
+np.save('data/list_source.npy', list_source)
           
           # driver.quit()
-          ```
+```
           
-          ## saving html source pages
-          ```{r}
+
+## saving html source pages
+```{r}
 full_html_source = py$list_source
 save(full_html_source, file = "data/full_html_source.Rdata")
 ```
