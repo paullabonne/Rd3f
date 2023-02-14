@@ -173,9 +173,8 @@ for day in r.date_ref:
           
 np.save('data/list_source.npy', list_source)
           
-          # driver.quit()
+#driver.quit()
 ```
-          
 
 ## saving html source pages
 ```{r}
