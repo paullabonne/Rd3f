@@ -14,7 +14,8 @@ import os
 
 os.chdir("code/rpyd3f")
 
-date_ref = feather.read_table('data/dates').to_pandas()["date_ref"]
+#date_ref = feather.read_table('data/dates').to_pandas()["date_ref"]
+date_ref = feather.read_table('data/dates_missing').to_pandas()["date_ref"]
 
 try:
   with open('data/arrow_source', 'rb') as f:
@@ -30,20 +31,18 @@ options = webdriver.ChromeOptions()
 options.add_argument("start-maximized")
 driver = uc.Chrome(options=options)
 driver.set_page_load_timeout(30000)
-
-date_ref_1 = date_ref[date_ref[date_ref == 'apr26.2010'].index[0]]
     
 # forex factor partial url
 ff_url = 'https://www.forexfactory.com/calendar?day='
 
-for day in date_ref_1 :
+for day in date_ref :
   # url of the day
   ff_day_url = ff_url + day
-    
+  
   # go to the day url
   driver.get(ff_day_url)
   time.sleep(1)
-  
+  print(ff_day_url)
   # find events
   calandar_elem_closed = driver.find_elements(By.CSS_SELECTOR, ".calendar_row > .detail > [title='Open Detail']")
     
@@ -65,5 +64,5 @@ driver.quit()
 
 arrow_source = pa.Table.from_arrays([dates, html_sources], names=["date", "source"])
 
-with open('data/arrow_source', 'wb') as f:
-    feather.write_feather(arrow_source, f)
+#with open('data/arrow_source', 'wb') as f:
+#    feather.write_feather(arrow_source, f)

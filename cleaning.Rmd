@@ -11,6 +11,9 @@ library(tidyr)
 ## Load the data
 ```{r}
 load("data/df_FF_full.Rdata")
+
+df_FF_full %<>%
+  spread(key = var, value = value)
 ```
 
 ## Cleaning the data 

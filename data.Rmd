@@ -36,7 +36,7 @@ write_feather(arrow_table(as.data.frame(date_ref)), "data/dates")
 df_FF = c()
 
 for (i in 1:length(date_ref)) {
-
+  
   page_link = paste0("https://www.forexfactory.com/calendar?day=", date_ref[i])
   
   elements <- read_html(page_link) %>% 
@@ -94,19 +94,30 @@ save(df_FF, file = "data/df_FF.Rdata")
 
 ##### Building a dataset from the html source
 ```{r, warning=FALSE}
-# load("data/full_html_source.Rdata")
+# load("data/df_FF_full.Rdata")
+df_FF_full = c()
+
 full_html_source <- read_feather('data/arrow_source')
+
+# date_range <- unlist(read_feather('data/dates_missing'))
+# full_html_source %<>%
+  # filter(date %in% date_range)
 
 # reøove potential duplicates
 full_html_source %<>%
-  arrange(date) %>%
-  group_by(date) %>% 
-  filter(n() == 1) %>%
-  ungroup()
+  mutate(date_new = as.Date(date, format = "%b%d.%Y")) %>% 
+  arrange(date_new) %>%
+  na.omit() %>%
+  distinct(date_new, .keep_all = TRUE)
 
-df_FF_full = c()
+# %>%
+# group_by(date_new) %>%
+# filter(n() > 1) %>%
+# ungroup()
 
-for (i in 1:nrow(full_html_source)) {
+missing_days = c()
+
+for (i in 1:length(date_range)) {
   
   page_i <- read_html(full_html_source$source[i])
   
@@ -148,51 +159,66 @@ for (i in 1:nrow(full_html_source)) {
       html_elements("span") %>%
       html_attr("title")
     
-    # getting the details
-    df_spec = c()
+    details = elements %>%
+      html_elements(".detail") %>%
+      html_elements(".loaded")
     
-    for (id in event_id) {
-      specs = page_i %>%
-        html_element(paste0("[data-eventid='", id, "'].detail")) %>%
-        html_element("tbody") %>%
-        html_table() %>%
-        mutate(event_id = id)
+    
+    if (length(details)>0) {
+      # getting the details
+      df_spec = c()
       
-      df_spec = rbind(df_spec, specs)
+      for (id in event_id) {
+        specs = page_i %>%
+          html_element(paste0("[data-eventid='", id, "'].detail")) %>%
+          html_element("tbody") %>%
+          html_table() %>%
+          mutate(event_id = id)
+        
+        df_spec = rbind(df_spec, specs)
+      }
+      
+      df_spec %<>% 
+        spread(key = X1, value = X2)
+      ##
+      
+      df_day = tibble(currency,
+                      event,
+                      forecast,
+                      observation,
+                      previous_obs,
+                      release_time,
+                      impact,
+                      event_id) %>%
+        mutate(release_time = ifelse(release_time == "", as.character(NA), release_time)) %>%
+        fill(release_time) %>%
+        mutate(date = full_html_source$date_new[i],
+               release_time = paste0(date, " ", release_time),
+               release_time = parse_date_time(release_time, "%Y %m %d %H:%M%p")) %>%
+        full_join(df_spec, by = "event_id") %>%
+        gather(-date, -event_id, -release_time, key = var, value = value)
+      
+      df_FF_full = rbind(df_FF_full,
+                         df_day)
+    } else {
+      missing_days = c(missing_days, full_html_source$date_new[i])
+      print(paste0(full_html_source$date[i], " is missing!"))
+      full_html_source %<>%
+        filter(date != full_html_source$date[i])
     }
-    
-    df_spec %<>% 
-      spread(key = X1, value = X2)
-    ##
-
-    df_day = tibble(currency,
-                    event,
-                    forecast,
-                    observation,
-                    previous_obs,
-                    release_time,
-                    impact,
-                    event_id) %>%
-      mutate(release_time = ifelse(release_time == "", as.character(NA), release_time)) %>%
-      fill(release_time) %>%
-      mutate(date = as.Date(full_html_source$date[i], format = "%b%d.%Y"),
-             release_time = paste0(date, " ", release_time),
-             release_time = parse_date_time(release_time, "%Y %m %d %H:%M%p")) %>%
-      full_join(df_spec, by = "event_id") %>%
-      gather(-date, -event_id, -release_time, key = var, value = value)
-      
-    df_FF_full = rbind(df_FF_full,
-                       df_day)
     
   }
   
   # show progress
-  show(as.Date(date_ref[i], format = "%b%d.%Y"))
-
+  show(full_html_source$date_new[i])
+  
 }
-
-df_FF_full %<>%
-  spread(key = var, value = value)
 
 save(df_FF_full, file = "data/df_FF_full.Rdata")
 ```
+
+```{r}
+# write_feather(arrow_table(as.data.frame(missing_days)), "data/dates_missing")
+# write_feather(arrow_table(full_html_source), "data/arrow_source")
+```
+
