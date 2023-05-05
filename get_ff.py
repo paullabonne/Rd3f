@@ -15,7 +15,7 @@ import os
 os.chdir("code/rpyd3f")
 
 #date_ref = feather.read_table('data/dates').to_pandas()["date_ref"]
-date_ref = feather.read_table('data/dates_missing').to_pandas()["date_ref"]
+date_ref = feather.read_table('data/dates_missing').to_pandas()["missing_days"]
 
 try:
   with open('data/arrow_source', 'rb') as f:
@@ -64,5 +64,5 @@ driver.quit()
 
 arrow_source = pa.Table.from_arrays([dates, html_sources], names=["date", "source"])
 
-#with open('data/arrow_source', 'wb') as f:
-#    feather.write_feather(arrow_source, f)
+with open('data/arrow_source', 'wb') as f:
+    feather.write_feather(arrow_source, f)
