@@ -18,13 +18,14 @@ library(kableExtra)
 load("data/df_FF_clean.Rdata")
 
 df_sum = df_FF_clean %>%
-  select(geo, event, date, forecast, type) %>%
+  select(geo, event, date, forecast, type, freq) %>%
   filter(!is.na(forecast)) %>%
   group_by(geo, event) %>%
   summarise(forecasts_available_from = as.yearmon(min(date)),
             forecasts_available_to = as.yearmon(max(date)),
             nb_forecasts = length(!is.na(forecast)),
-            type = unique(type))
+            type = unique(type),
+            freq = unique(freq))
   
 df_sum %>%
   group_by(geo) %>%
@@ -39,8 +40,24 @@ df_sum %>%
   kable_classic(full_width = F, html_font = "Cambria")
 
 df_sum %>%
+  filter(type == "economic growth") %>%
+  kbl(caption = "Employment expectation data") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+df_sum %>%
   filter(type == "employment") %>%
   kbl(caption = "Employment expectation data") %>%
   kable_classic(full_width = F, html_font = "Cambria")
+
+df_sum %>%
+  filter(event %in% c("overnight rate", "official bank rate", "main refinancing rate",
+                      "official cash rate", "federal funds rate", "snb policy rate")) %>%
+  kbl(caption = "Employment expectation data") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+  # mutate(from = as.character(forecasts_available_from),
+  #        to = as.character(forecasts_available_to)) %>%
+  # select(-type, -forecasts_available_from, -forecasts_available_to) %>%
+  # stargazer(summary = FALSE, rownames=FALSE)
 ```
 

@@ -46,6 +46,7 @@ df_FF_clean %<>%
          value = str_replace(value, "K", "000"),
          value = str_replace(value, "M", "000000"),
          value = str_replace(value, "B", "000000000"),
+         value = str_remove(value, "<"),
          value = as.numeric(value)) %>%
   spread(key = var, value = value) %>%
   relocate(date, release_time, geo, currency)
@@ -143,10 +144,34 @@ save(df_FF_clean, file = "data/df_FF_clean.Rdata")
 
 ## adding inflation and employment indicator
 ```{r}
+library(sjmisc)
+
+infl = c("price", "infl", "cpe", "cpi", "pce", "ppi", "pi", "hpi",
+         "wage", "earnings", "earning", "wpi", "inflation", "labor cost")
+
+empl = c("employment", "unemployment", "claim", "claimant")
+
+econ_g = c("gdp", "ip", "manufacturing", "construction", "vehicle sales",
+           "services", "orders", "retail sales", "economic expectations",
+           "leading index", "wholesale sales", "cbi", "industrial new orders",
+           "credit card spending", "pmi")
+
+housing = c("mortgage", "home", "building", "housing", "house")
+
+confidence = c("confidence", "home", "sentiment", "climate")
+
+monetary_pol = c("rate")
+
 df_FF_clean %<>%
+  group_by(event) %>%
   mutate(type = NA,
-         type = ifelse(grepl("price | infl | cpe | cpi | pce | ppi | pi | hpi | wage", event), "inflation", type),
-         type = ifelse(grepl("employment | unemployment | claim", event), "employment", type))
+         type = ifelse(any(str_contains(event, infl)), "inflation", type),
+         type = ifelse(any(str_contains(event, empl)), "employment", type),
+         type = ifelse(any(str_contains(event, econ_g)), "economic growth", type),
+         type = ifelse(any(str_contains(event, housing)), "housing", type),
+         type = ifelse(any(str_contains(event, confidence)), "confidence", type),
+         type = ifelse(any(str_contains(event, monetary_pol)), "monetary_pol", type)) %>%
+  ungroup()
 
 save(df_FF_clean, file = "data/df_FF_clean.Rdata")
 ```
