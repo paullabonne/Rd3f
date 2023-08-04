@@ -12,10 +12,11 @@ import sys
 from datetime import datetime
 import os
 
-os.chdir("code/rpyd3f")
+os.chdir("Dropbox (BI Norwegian Business School)/rpyd3f")
 
-#date_ref = feather.read_table('data/dates').to_pandas()["date_ref"]
-date_ref = feather.read_table('data/dates_missing').to_pandas()["missing_days"]
+# date_ref = feather.read_table('data/dates').to_pandas()["date_ref"]
+# date_ref = feather.read_table('data/dates_missing').to_pandas()["missing_days"]
+date_ref = feather.read_table('data/dates_update').to_pandas()["date_ref"]
 
 try:
   with open('data/arrow_source', 'rb') as f:
