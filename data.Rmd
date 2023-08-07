@@ -105,29 +105,23 @@ save(df_FF, file = "data/df_FF.Rdata")
 ```
 
 ### Building a full dataset excluding Forex Factory's details variables
-
 ##### Building a dataset from the html source
 ```{r, warning=FALSE}
-# load("data/df_FF_full.Rdata")
-df_FF_full = c()
+load("data/df_FF_full.Rdata")
+# df_FF_full = c()
 
 full_html_source <- read_feather('data/arrow_source')
 
-# date_range <- unlist(read_feather('data/dates_missing'))
-# full_html_source %<>%
-  # filter(date %in% date_range)
+date_range <- unlist(read_feather('data/dates_update'))
+full_html_source %<>%
+  filter(date %in% date_range)
 
-# reøove potential duplicates
+# remove potential duplicates
 full_html_source %<>%
   mutate(date_new = as.Date(date, format = "%b%d.%Y")) %>% 
   arrange(date_new) %>%
   na.omit() %>%
   distinct(date_new, .keep_all = TRUE)
-
-# %>%
-# group_by(date_new) %>%
-# filter(n() > 1) %>%
-# ungroup()
 
 missing_days = c()
 
