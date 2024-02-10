@@ -35,7 +35,7 @@ write_feather(arrow_table(as.data.frame(date_ref)), "data/dates")
 ```{r}
 library(arrow)
 
-date_range = seq(as.Date("2023-05-04"), as.Date("2023-08-03"), by = "days")
+date_range = seq(as.Date("2023-08-04"), as.Date("2024-02-09"), by = "days")
 day_ref = day(date_range)
 month_ref = str_to_lower(month(date_range, label = TRUE))
 year_ref = year(date_range)
@@ -43,7 +43,6 @@ date_ref = paste0(month_ref, day_ref, ".", year_ref)
 
 write_feather(arrow_table(as.data.frame(date_ref)), "data/dates_update")
 ```
-
 
 ##### Building a dataset from the html source
 ```{r}
@@ -110,8 +109,7 @@ save(df_FF, file = "data/df_FF.Rdata")
 load("data/df_FF_full.Rdata")
 # df_FF_full = c()
 
-full_html_source <- read_feather('data/arrow_source')
-
+full_html_source <- read_parquet('data/html_source.parquet')
 date_range <- unlist(read_feather('data/dates_update'))
 full_html_source %<>%
   filter(date %in% date_range)
@@ -227,6 +225,5 @@ save(df_FF_full, file = "data/df_FF_full.Rdata")
 
 ```{r}
 # write_feather(arrow_table(as.data.frame(missing_days)), "data/dates_missing")
-# write_feather(arrow_table(full_html_source), "data/arrow_source")
 ```
 
