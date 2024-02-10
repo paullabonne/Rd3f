@@ -103,7 +103,7 @@ for (i in 1:length(date_ref)) {
 save(df_FF, file = "data/df_FF.Rdata")
 ```
 
-### Building a full dataset excluding Forex Factory's details variables
+### Building a full dataset including Forex Factory's details variables
 ##### Building a dataset from the html source
 ```{r, warning=FALSE}
 load("data/df_FF_full.Rdata")
@@ -134,57 +134,59 @@ for (i in 1:length(date_range)) {
   if (length(elements) > 0) {
     
     currency <- elements %>%
-      html_elements(".currency") %>%
+      html_elements(".calendar__currency") %>%
       html_text2()
     
     event <- elements %>%
-      html_elements(".event") %>%
+      html_elements(".calendar__event") %>%
       html_text2()
     
     forecast <- elements %>%
-      html_elements(".forecast") %>%
+      html_elements(".calendar__forecast") %>%
       html_text2()
     
     observation <- elements %>%
-      html_elements(".actual") %>%
+      html_elements(".calendar__actual") %>%
       html_text2()
     
     previous_obs <- elements %>%
-      html_elements(".previous") %>%
+      html_elements(".calendar__previous") %>%
       html_text2()
     
     release_time <- elements %>%
-      html_elements(".time") %>%
+      html_elements(".calendar__time") %>%
       html_text2()
     
     event_id = elements %>%
-      html_attr("data-eventid")
+      html_attr("data-event-id")
     
     impact = elements %>%
-      html_elements(".impact") %>%
+      html_elements(".calendar__impact") %>%
       html_elements("span") %>%
       html_attr("title")
     
-    details = elements %>%
-      html_elements(".detail") %>%
-      html_elements(".loaded")
+    details = page_i %>%
+      html_elements(".overlay__content")
     
+    if (length(details) != length(event_id)) stop("problem")
     
     if (length(details)>0) {
       # getting the details
-      df_spec = c()
+      specs = page_i %>%
+        html_elements(".flexBox .specs")
       
-      for (id in event_id) {
-        specs = page_i %>%
-          html_element(paste0("[data-eventid='", id, "'].detail")) %>%
-          html_element("tbody") %>%
-          html_table() %>%
-          mutate(event_id = id)
+      df_details = list()
+      
+      for (j in 1:length(event_id)) {
+        tables = specs[j] %>%
+          html_elements("table")
         
-        df_spec = rbind(df_spec, specs)
+        df_details[[j]] = tables[[2]] %>%
+          html_table() %>%
+          mutate(event_id = event_id[j])
       }
-      
-      df_spec %<>% 
+      df_details = bind_rows(df_details)
+      df_details %<>% 
         spread(key = X1, value = X2)
       ##
       
@@ -201,7 +203,7 @@ for (i in 1:length(date_range)) {
         mutate(date = full_html_source$date_new[i],
                release_time = paste0(date, " ", release_time),
                release_time = parse_date_time(release_time, "%Y %m %d %H:%M%p")) %>%
-        full_join(df_spec, by = "event_id") %>%
+        full_join(df_details, by = "event_id") %>%
         gather(-date, -event_id, -release_time, key = var, value = value)
       
       df_FF_full = rbind(df_FF_full,
