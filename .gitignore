@@ -10,3 +10,4 @@ plots.Rmd
 data/df_FF_clean.parquet
 data/df_FF_full.parquet
 data/df_FF.parquet
+data/html_source.parquet

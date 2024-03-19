@@ -13,7 +13,7 @@ R and Python code for creating a dataframe out of the [Forex Factory](https://ww
 ```{r, message = F}
 library(dplyr)
 library(knitr)
-library(knitr)
+library(arrow)
 
 df = read_parquet("data/df_FF_clean.parquet")
 

@@ -16,7 +16,9 @@ Factory](https://www.forexfactory.com) online economic calendar.
 ``` r
 library(dplyr)
 library(knitr)
-df = arrow::read_parquet("data/df_FF_clean.parquet")
+library(arrow)
+
+df = read_parquet("data/df_FF_clean.parquet")
 
 df_day = df %>%
   filter(date == "2023-12-08")
