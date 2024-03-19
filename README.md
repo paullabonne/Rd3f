@@ -4,12 +4,12 @@ rpyd3f
 R and Python code for creating a dataframe out of the [Forex
 Factory](https://www.forexfactory.com) online economic calendar.
 
-- The `Python` code in `get_ff.py` scraps the html source page of the
+- The `Python` code in `get_ff.py` scrapes the HTML source page of the
   economic calendar for each day.
-- The `R` code in `build_ff.Rmd` creates a dataframe out of these html
+- The `R` code in `build_ff.Rmd` creates a dataframe out of these HTML
   source pages.
 - The `R` code in `cleaning.Rmd` cleans the data and categorises the
-  variables into groups, i.g. inflation.  
+  variables into groups, e.g., inflation.  
 - The `R` code in `summary.Rmd` provides a summary of the resulting
   dataset.
 
