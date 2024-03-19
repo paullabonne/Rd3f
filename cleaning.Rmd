@@ -10,7 +10,7 @@ library(tidyr)
 
 ## Load the data
 ```{r}
-load("data/df_FF_full.Rdata")
+read_parquet('data/df_FF_full.parquet')
 
 df_FF_full %<>%
   spread(key = var, value = value)
@@ -75,8 +75,6 @@ df_FF_clean %<>%
 # creating change variable
 df_FF_clean %<>%
   mutate(change = observation - previous_obs)
-
-save(df_FF_clean, file = "data/df_FF_clean.Rdata")
 ```
 
 ## Finding the target period
@@ -141,8 +139,6 @@ df_FF_clean %>%
 # filter(!grepl("days", Frequency) &
 #                           (grepl("after", Frequency)) &
 #                           freq == "weekly")
-
-save(df_FF_clean, file = "data/df_FF_clean.Rdata")
 ```
 
 ## adding inflation and employment indicator
@@ -175,9 +171,10 @@ df_FF_clean %<>%
          type = ifelse(any(str_contains(event, housing)), "housing", type),
          type = ifelse(any(str_contains(event, infl)), "inflation", type),
          type = ifelse(event == "empire state manufacturing index", "confidence", type)) %>%
-  ungroup()
+  ungroup() %>%
+  arrange(release_time)
 
-save(df_FF_clean, file = "data/df_FF_clean.Rdata")
+arrow::write_parquet(df_FF_clean, "data/df_FF_clean.parquet")
 ```
 
 ## check classification
@@ -202,11 +199,3 @@ df_suma = df_FF_clean %>%
 stargazer::stargazer(df_suma, summary = FALSE, rownames=FALSE)
 ```
 
-
-## sort by release_time
-```{r}
-df_FF_clean %<>%
-  arrange(release_time)
-
-save(df_FF_clean, file = "data/df_FF_clean.Rdata")
-```

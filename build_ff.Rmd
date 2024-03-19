@@ -100,13 +100,13 @@ for (i in 1:length(date_ref)) {
   show(as.Date(date_ref[i], format = "%b%d.%Y"))
 }
 
-save(df_FF, file = "data/df_FF.Rdata")
+arrow::write_parquet(df_FF, "data/df_FF.parquet")
 ```
 
 ### Building a full dataset including Forex Factory's details variables
 ##### Building a dataset from the html source
 ```{r, warning=FALSE}
-load("data/df_FF_full.Rdata")
+read_parquet('data/df_FF_full.parquet')
 # df_FF_full = c()
 
 full_html_source <- read_parquet('data/html_source.parquet')
@@ -222,7 +222,7 @@ for (i in 1:length(date_range)) {
   
 }
 
-save(df_FF_full, file = "data/df_FF_full.Rdata")
+arrow::write_parquet(df_FF_full, "data/df_FF_full.parquet")
 ```
 
 ```{r}
