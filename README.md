@@ -12,22 +12,21 @@ Factory](https://www.forexfactory.com) online economic calendar.
   variables into groups, i.g. inflation.  
 - The `R` code in `summary.Rmd` provides a summary of the resulting
   dataset.
-- The data are saved with the Apache
-  [parquet](https://arrow.apache.org/docs/python/parquet.html) so they
-  can be loaded with different environment, e.g. `R`, `Pyhton`, `Matlab`
-  etc.
 
 ``` r
+library(dplyr)
+library(knitr)
 df = arrow::read_parquet("data/df_FF_clean.parquet")
 
-knitr::kable(tail(df), format = "html")
+df_day = df %>%
+  filter(date == "2023-12-08")
+
+kable(df_day, format = "html")
 ```
 
 <table>
 <thead>
 <tr>
-<th style="text-align:left;">
-</th>
 <th style="text-align:left;">
 date
 </th>
@@ -93,147 +92,10 @@ type
 <tbody>
 <tr>
 <td style="text-align:left;">
-54488
+2023-12-08
 </td>
 <td style="text-align:left;">
-2024-02-09
-</td>
-<td style="text-align:left;">
-2024-02-09 08:00:00
-</td>
-<td style="text-align:left;">
-China
-</td>
-<td style="text-align:left;">
-CNY
-</td>
-<td style="text-align:left;">
-new loans
-</td>
-<td style="text-align:left;">
-135170
-</td>
-<td style="text-align:left;">
-Medium Impact Expected
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-Source does not have a reliable release schedule - this event will be
-listed with a date range or as ‘Tentative’ until the data is released;
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-released monthly, about 11 days after the month ends;
-</td>
-<td style="text-align:left;">
-Value of new yuan-denominated loans issued to consumers and businesses
-during the previous month;
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-4.92e+12
-</td>
-<td style="text-align:right;">
-1.17e+12
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3.75e+12
-</td>
-<td style="text-align:left;">
-monthly
-</td>
-<td style="text-align:left;">
-Jan 2024
-</td>
-<td style="text-align:left;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-54489
-</td>
-<td style="text-align:left;">
-2024-02-09
-</td>
-<td style="text-align:left;">
-2024-02-09 08:00:00
-</td>
-<td style="text-align:left;">
-China
-</td>
-<td style="text-align:left;">
-CNY
-</td>
-<td style="text-align:left;">
-m2 money supply y/y
-</td>
-<td style="text-align:left;">
-135169
-</td>
-<td style="text-align:left;">
-Low Impact Expected
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-Source does not have a reliable release schedule - this event will be
-listed with a date range or as ‘Tentative’ until the data is released;
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-released monthly, about 11 days after the month ends;
-</td>
-<td style="text-align:left;">
-Change in the total quantity of domestic currency in circulation and
-deposited in banks;
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-8.70e+00
-</td>
-<td style="text-align:right;">
-9.70e+00
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
--1.00e+00
-</td>
-<td style="text-align:left;">
-monthly
-</td>
-<td style="text-align:left;">
-Jan 2024
-</td>
-<td style="text-align:left;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-54490
-</td>
-<td style="text-align:left;">
-2024-02-09
-</td>
-<td style="text-align:left;">
-2024-02-09 08:00:00
+2023-12-08 08:00:00
 </td>
 <td style="text-align:left;">
 Germany
@@ -245,7 +107,7 @@ EUR
 final cpi m/m
 </td>
 <td style="text-align:left;">
-139363
+132167
 </td>
 <td style="text-align:left;">
 Low Impact Expected
@@ -270,25 +132,25 @@ released monthly, about 11 days after the month ends;
 Change in the price of goods and services purchased by consumers;
 </td>
 <td style="text-align:right;">
-0.2
+-0.4
 </td>
 <td style="text-align:right;">
-2.00e-01
+-0.4
 </td>
 <td style="text-align:right;">
-2.00e-01
+-0.4
 </td>
 <td style="text-align:right;">
 0.0
 </td>
 <td style="text-align:right;">
-0.00e+00
+0.0
 </td>
 <td style="text-align:left;">
 monthly
 </td>
 <td style="text-align:left;">
-Jan 2024
+Nov 2023
 </td>
 <td style="text-align:left;">
 inflation
@@ -296,25 +158,22 @@ inflation
 </tr>
 <tr>
 <td style="text-align:left;">
-54491
+2023-12-08
 </td>
 <td style="text-align:left;">
-2024-02-09
+2023-12-08 10:30:00
 </td>
 <td style="text-align:left;">
-2024-02-09 10:00:00
+UK
 </td>
 <td style="text-align:left;">
-Italy
+GBP
 </td>
 <td style="text-align:left;">
-EUR
+consumer inflation expectations
 </td>
 <td style="text-align:left;">
-industrial production m/m
-</td>
-<td style="text-align:left;">
-134724
+133271
 </td>
 <td style="text-align:left;">
 Low Impact Expected
@@ -329,46 +188,43 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-released monthly, about 40 days after the month ends;
+released quarterly, about 20 days after the survey is conducted;
 </td>
 <td style="text-align:left;">
-Change in the total inflation-adjusted value of output produced by
-manufacturers, mines, and utilities;
+Percentage that consumers expect the price of goods and services to
+change during the next 12 months;
 </td>
 <td style="text-align:right;">
-0.8
+NA
 </td>
 <td style="text-align:right;">
-1.10e+00
+3.3
 </td>
 <td style="text-align:right;">
--1.30e+00
+3.6
+</td>
+<td style="text-align:right;">
+NA
 </td>
 <td style="text-align:right;">
 -0.3
 </td>
-<td style="text-align:right;">
-2.40e+00
+<td style="text-align:left;">
+quarterly
 </td>
 <td style="text-align:left;">
-monthly
+2023 Q3
 </td>
 <td style="text-align:left;">
-Dec 2023
-</td>
-<td style="text-align:left;">
-economic growth
+inflation
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-54492
+2023-12-08
 </td>
 <td style="text-align:left;">
-2024-02-09
-</td>
-<td style="text-align:left;">
-2024-02-09 14:30:00
+2023-12-08 14:30:00
 </td>
 <td style="text-align:left;">
 Canada
@@ -377,10 +233,137 @@ Canada
 CAD
 </td>
 <td style="text-align:left;">
-employment change
+capacity utilization rate
 </td>
 <td style="text-align:left;">
-138082
+132628
+</td>
+<td style="text-align:left;">
+Low Impact Expected
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+released quarterly, about 75 days after the quarter ends;
+</td>
+<td style="text-align:left;">
+Percentage of available resources being utilized by manufacturers,
+builders, mines, oil extractors, and utilities;
+</td>
+<td style="text-align:right;">
+81.4
+</td>
+<td style="text-align:right;">
+79.7
+</td>
+<td style="text-align:right;">
+79.6
+</td>
+<td style="text-align:right;">
+1.7
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:left;">
+quarterly
+</td>
+<td style="text-align:left;">
+2023 Q3
+</td>
+<td style="text-align:left;">
+economic growth
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2023-12-08
+</td>
+<td style="text-align:left;">
+2023-12-08 14:30:00
+</td>
+<td style="text-align:left;">
+USA
+</td>
+<td style="text-align:left;">
+USD
+</td>
+<td style="text-align:left;">
+average hourly earnings m/m
+</td>
+<td style="text-align:left;">
+129757
+</td>
+<td style="text-align:left;">
+High Impact Expected
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+This is the earliest data related to labor inflation. Source changed
+series calculation formula as of Feb 2010;
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+released monthly, usually on the first friday after the month ends;
+</td>
+<td style="text-align:left;">
+Change in the price businesses pay for labor, excluding the farming
+industry;
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:right;">
+-0.1
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:left;">
+monthly
+</td>
+<td style="text-align:left;">
+Nov 2023
+</td>
+<td style="text-align:left;">
+inflation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2023-12-08
+</td>
+<td style="text-align:left;">
+2023-12-08 14:30:00
+</td>
+<td style="text-align:left;">
+USA
+</td>
+<td style="text-align:left;">
+USD
+</td>
+<td style="text-align:left;">
+non-farm employment change
+</td>
+<td style="text-align:left;">
+129755
 </td>
 <td style="text-align:left;">
 High Impact Expected
@@ -396,31 +379,32 @@ combination of importance and earliness makes for hefty market impacts;
 NA
 </td>
 <td style="text-align:left;">
-released monthly, about 8 days after the month ends;
+released monthly, usually on the first friday after the month ends;
 </td>
 <td style="text-align:left;">
-Change in the number of employed people during the previous month;
+Change in the number of employed people during the previous month,
+excluding the farming industry;
 </td>
 <td style="text-align:right;">
-16.0
+184000.0
 </td>
 <td style="text-align:right;">
-3.73e+01
+199000.0
 </td>
 <td style="text-align:right;">
-1.00e-01
+150000.0
 </td>
 <td style="text-align:right;">
--21.3
+-15000.0
 </td>
 <td style="text-align:right;">
-3.72e+01
+49000.0
 </td>
 <td style="text-align:left;">
 monthly
 </td>
 <td style="text-align:left;">
-Jan 2024
+Nov 2023
 </td>
 <td style="text-align:left;">
 employment
@@ -428,25 +412,22 @@ employment
 </tr>
 <tr>
 <td style="text-align:left;">
-54493
+2023-12-08
 </td>
 <td style="text-align:left;">
-2024-02-09
+2023-12-08 14:30:00
 </td>
 <td style="text-align:left;">
-2024-02-09 14:30:00
+USA
 </td>
 <td style="text-align:left;">
-Canada
-</td>
-<td style="text-align:left;">
-CAD
+USD
 </td>
 <td style="text-align:left;">
 unemployment rate
 </td>
 <td style="text-align:left;">
-138083
+129756
 </td>
 <td style="text-align:left;">
 High Impact Expected
@@ -461,36 +442,169 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-released monthly, about 8 days after the month ends;
+released monthly, usually on the first friday after the month ends;
 </td>
 <td style="text-align:left;">
 Percentage of the total work force that is unemployed and actively
 seeking employment during the previous month;
 </td>
 <td style="text-align:right;">
-5.9
+3.9
 </td>
 <td style="text-align:right;">
-5.70e+00
+3.7
 </td>
 <td style="text-align:right;">
-5.80e+00
+3.9
 </td>
 <td style="text-align:right;">
 0.2
 </td>
 <td style="text-align:right;">
--1.00e-01
+-0.2
 </td>
 <td style="text-align:left;">
 monthly
 </td>
 <td style="text-align:left;">
-Jan 2024
+Nov 2023
 </td>
 <td style="text-align:left;">
 employment
 </td>
 </tr>
+<tr>
+<td style="text-align:left;">
+2023-12-08
+</td>
+<td style="text-align:left;">
+2023-12-08 16:00:00
+</td>
+<td style="text-align:left;">
+USA
+</td>
+<td style="text-align:left;">
+USD
+</td>
+<td style="text-align:left;">
+prelim uom consumer sentiment
+</td>
+<td style="text-align:left;">
+130448
+</td>
+<td style="text-align:left;">
+High Impact Expected
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+There are 2 versions of this data released 14 days apart – Preliminary
+and Revised. The Preliminary release is the earlier and thus tends to
+have the most impact;
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+released monthly, around the middle of the current month;
+</td>
+<td style="text-align:left;">
+Level of a composite index based on surveyed consumers;
+</td>
+<td style="text-align:right;">
+62.0
+</td>
+<td style="text-align:right;">
+69.4
+</td>
+<td style="text-align:right;">
+61.3
+</td>
+<td style="text-align:right;">
+-7.4
+</td>
+<td style="text-align:right;">
+8.1
+</td>
+<td style="text-align:left;">
+monthly
+</td>
+<td style="text-align:left;">
+Dec 2023
+</td>
+<td style="text-align:left;">
+confidence
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2023-12-08
+</td>
+<td style="text-align:left;">
+2023-12-08 16:00:00
+</td>
+<td style="text-align:left;">
+USA
+</td>
+<td style="text-align:left;">
+USD
+</td>
+<td style="text-align:left;">
+prelim uom inflation expectations
+</td>
+<td style="text-align:left;">
+130447
+</td>
+<td style="text-align:left;">
+Medium Impact Expected
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+There are 2 versions of this data released 14 days apart – Preliminary
+and Revised. The Preliminary release is the earlier and thus tends to
+have the most impact;
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+released monthly, around the middle of the current month;
+</td>
+<td style="text-align:left;">
+Percentage that consumers expect the price of goods and services to
+change during the next 12 months;
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3.1
+</td>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+-1.4
+</td>
+<td style="text-align:left;">
+monthly
+</td>
+<td style="text-align:left;">
+Dec 2023
+</td>
+<td style="text-align:left;">
+inflation
+</td>
+</tr>
 </tbody>
 </table>
+
+- Note that these data are protected by the
+  [copyright](https://www.forexfactory.com/notices#copyrightof) of Fair
+  Economy, Inc.

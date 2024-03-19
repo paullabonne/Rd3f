@@ -7,3 +7,6 @@ misc.Rmd
 notes.txt
 plots.Rmd
 .Rproj
+data/df_FF_clean.parquet
+data/df_FF_full.parquet
+data/df_FF.parquet
