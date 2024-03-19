@@ -33,6 +33,7 @@ options = webdriver.ChromeOptions()
 options.add_argument("start-maximized")
 driver = Driver(uc=True, incognito=True)
 
+### these are alternative webdrivers
 #import undetected_chromedriver as uc
 ## drver = uc.Chrome(driver_executable_path = "chromedriver", options=options)
 # driver.set_page_load_timeout(30000)
@@ -40,7 +41,8 @@ driver = Driver(uc=True, incognito=True)
 # from selenium.webdriver.chrome.service import Service
 # options.add_argument('--start-maximized')
 # driver = webdriver.Chrome(service=Service(), options=options)
-    
+###
+
 # forex factor partial url
 ff_url = 'https://www.forexfactory.com/calendar?day='
 
@@ -52,6 +54,7 @@ for day in date_ref :
   driver.get(ff_day_url)
   time.sleep(1)
   print(ff_day_url)
+  
   # find events
   calandar_elem_closed = driver.find_elements(By.CSS_SELECTOR, ".calendar__cell > [title='Open Detail']")
     

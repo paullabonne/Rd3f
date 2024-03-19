@@ -1,5 +1,5 @@
 ---
-title: "Summary"
+title: "Summary of the forex factory dataset"
 output: html_document
 date: "2023-02-02"
 ---
@@ -54,10 +54,5 @@ df_sum %>%
                       "official cash rate", "federal funds rate", "snb policy rate")) %>%
   kbl(caption = "Employment expectation data") %>%
   kable_classic(full_width = F, html_font = "Cambria")
-
-  # mutate(from = as.character(forecasts_available_from),
-  #        to = as.character(forecasts_available_to)) %>%
-  # select(-type, -forecasts_available_from, -forecasts_available_to) %>%
-  # stargazer(summary = FALSE, rownames=FALSE)
 ```
 
