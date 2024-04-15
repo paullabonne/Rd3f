@@ -1,13 +1,3 @@
----
-title: "Building dataframes from the economic calendar of Forex Factory"
-output: html_document
-date: "2023-02-02"
----
-
-### Building a partial dataset excluding Forex Factory's details variables
-
-##### Loading R packages
-```{r, warning = FALSE}
 library(dplyr)
 library(rvest)
 library(lubridate)
@@ -16,79 +6,22 @@ library(zoo)
 library(magrittr)
 library(tidyr)
 library(arrow)
-```
 
-##### Building a dataset from the html source
-```{r}
-df_FF = c()
-
-for (i in 1:length(date_ref)) {
-  
-  page_link = paste0("https://www.forexfactory.com/calendar?day=", date_ref[i])
-  
-  elements <- read_html(page_link) %>% 
-    html_elements(".calendar__table") %>% 
-    html_elements(".calendar__row--grey")
-  
-  currency <- elements %>%
-    html_elements(".currency") %>%
-    html_text2()
-  
-  event <- elements %>%
-    html_elements(".event") %>%
-    html_text2()
-  
-  forecast <- elements %>%
-    html_elements(".forecast") %>%
-    html_text2()
-  
-  observation <- elements %>%
-    html_elements(".actual") %>%
-    html_text2()
-  
-  previous_obs <- elements %>%
-    html_elements(".previous") %>%
-    html_text2()
-  
-  impact = elements %>%
-    html_elements(".impact") %>%
-    html_elements(".icon") %>%
-    html_attr("title")
-  
-  event_id = elements %>%
-    html_attr("data-eventid")
-  
-  df_day = tibble(currency,
-                  event,
-                  forecast,
-                  observation,
-                  previous_obs,
-                  impact,
-                  event_id) %>%
-    mutate(date = as.Date(date_ref[i], format = "%b%d.%Y"))
-  
-  df_FF = rbind(df_FF,
-                df_day)
-  
-  # show progress
-  show(as.Date(date_ref[i], format = "%b%d.%Y"))
-}
-
-arrow::write_parquet(df_FF, "data/df_FF.parquet")
-```
-
-### Building a full dataset including Forex Factory's details variables
-##### Building a dataset from the html source
-```{r, warning=FALSE}
+# load the dataset if it has already been created before and just need to be updated
 read_parquet('data/df_FF_full.parquet')
+
+# if created for the first time
 # df_FF_full = c()
 
+# load the html sources scrapped with the python code
 full_html_source <- read_parquet('data/html_source.parquet')
-date_range <- unlist(read_feather('data/dates_update'))
+
+# load the dates
+date_range <- unlist(read_feather('data/dates'))
 full_html_source %<>%
   filter(date %in% date_range)
 
-# remove potential duplicates
+# remove potential duplicated days
 full_html_source %<>%
   mutate(date_new = as.Date(date, format = "%b%d.%Y")) %>% 
   arrange(date_new) %>%
@@ -146,6 +79,7 @@ for (i in 1:length(date_range)) {
     
     if (length(details)>0) {
       # getting the details
+      
       specs = page_i %>%
         html_elements(".flexBox .specs")
       
@@ -196,6 +130,5 @@ for (i in 1:length(date_range)) {
   
 }
 
-arrow::write_parquet(df_FF_full, "data/df_FF_full.parquet")
-```
-
+# save
+write_parquet(df_FF_full, "data/df_FF_full.parquet")
