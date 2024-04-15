@@ -32,7 +32,7 @@ df_clean = clean_df(df_updated)
 library(dplyr)
 library(knitr)
 
-df_day = df %>%
+df_day = df_clean %>%
   filter(date == "2024-04-11")
 
 kable(df_day, format = "html")

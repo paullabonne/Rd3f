@@ -46,34 +46,24 @@ df_clean = clean_df(df_updated)
 library(dplyr)
 library(knitr)
 
-df_day = df %>%
+df_day = df_clean %>%
   filter(date == "2024-04-11")
 
 kable(df_day, format = "html")
 ```
 
-| currency | event                             | forecast | observation | previous_obs | impact | event_id | date       |
-|:---------|:----------------------------------|:---------|:------------|:-------------|:-------|:---------|:-----------|
-| GBP      | RICS House Price Balance          | -6%      | -4%         | -10%         | low    | 135799   | 2024-04-11 |
-| JPY      | M2 Money Stock y/y                | 2.4%     | 2.5%        | 2.4%         | low    | 139618   | 2024-04-11 |
-| AUD      | MI Inflation Expectations         |          | 4.6%        | 4.3%         | low    | 137249   | 2024-04-11 |
-| CNY      | CPI y/y                           | 0.4%     | 0.1%        | 0.7%         | medium | 135149   | 2024-04-11 |
-| CNY      | PPI y/y                           | -2.8%    | -2.8%       | -2.7%        | medium | 135150   | 2024-04-11 |
-| EUR      | Italian Industrial Production m/m | 0.6%     | 0.1%        | -1.4%        | low    | 134726   | 2024-04-11 |
-| GBP      | BOE Credit Conditions Survey      |          |             |              | low    | 135702   | 2024-04-11 |
-| EUR      | Eurogroup Meetings                |          |             |              | low    | 135586   | 2024-04-11 |
-| EUR      | Main Refinancing Rate             | 4.50%    | 4.50%       | 4.50%        | high   | 135510   | 2024-04-11 |
-| EUR      | Monetary Policy Statement         |          |             |              | high   | 135511   | 2024-04-11 |
-| USD      | Core PPI m/m                      | 0.2%     | 0.2%        | 0.3%         | high   | 136015   | 2024-04-11 |
-| USD      | PPI m/m                           | 0.3%     | 0.2%        | 0.6%         | high   | 136014   | 2024-04-11 |
-| USD      | Unemployment Claims               | 216K     | 211K        | 222k         | high   | 136537   | 2024-04-11 |
-| EUR      | ECB Press Conference              |          |             |              | high   | 135509   | 2024-04-11 |
-| USD      | FOMC Member Williams Speaks       |          |             |              | low    | 140132   | 2024-04-11 |
-| USD      | FOMC Member Barkin Speaks         |          |             |              | medium | 140140   | 2024-04-11 |
-| USD      | Natural Gas Storage               | 14B      | 24B         | -37B         | low    | 135935   | 2024-04-11 |
-| GBP      | MPC Member Greene Speaks          |          |             |              | low    | 140133   | 2024-04-11 |
-| USD      | 30-y Bond Auction                 |          | 4.67\|2.4   | 4.33\|2.5    | high   | 137320   | 2024-04-11 |
-| USD      | FOMC Member Bostic Speaks         |          |             |              | low    | 140141   | 2024-04-11 |
+| date       | geo       | currency | event                     | impact | event_id |  forecast | observation | previous_obs |  error |   change | type            |
+|:-----------|:----------|:---------|:--------------------------|:-------|:---------|----------:|------------:|-------------:|-------:|---------:|:----------------|
+| 2024-04-11 | UK        | GBP      | rics house price balance  | low    | 135799   | -6.00e+00 |   -4.00e+00 |     -1.0e+01 | -2e+00 |  6.0e+00 | inflation       |
+| 2024-04-11 | Australia | AUD      | mi inflation expectations | low    | 137249   |        NA |    4.60e+00 |      4.3e+00 |     NA |  3.0e-01 | inflation       |
+| 2024-04-11 | China     | CNY      | cpi y/y                   | medium | 135149   |  4.00e-01 |    1.00e-01 |      7.0e-01 |  3e-01 | -6.0e-01 | inflation       |
+| 2024-04-11 | China     | CNY      | ppi y/y                   | medium | 135150   | -2.80e+00 |   -2.80e+00 |     -2.7e+00 |  0e+00 | -1.0e-01 | inflation       |
+| 2024-04-11 | Italy     | EUR      | industrial production m/m | low    | 134726   |  6.00e-01 |    1.00e-01 |     -1.4e+00 |  5e-01 |  1.5e+00 | economic growth |
+| 2024-04-11 | Euro Area | EUR      | main refinancing rate     | high   | 135510   |  4.50e+00 |    4.50e+00 |      4.5e+00 |  0e+00 |  0.0e+00 | monetary_pol    |
+| 2024-04-11 | USA       | USD      | core ppi m/m              | high   | 136015   |  2.00e-01 |    2.00e-01 |      3.0e-01 |  0e+00 | -1.0e-01 | inflation       |
+| 2024-04-11 | USA       | USD      | ppi m/m                   | high   | 136014   |  3.00e-01 |    2.00e-01 |      6.0e-01 |  1e-01 | -4.0e-01 | inflation       |
+| 2024-04-11 | USA       | USD      | unemployment claims       | high   | 136537   |  2.16e+05 |    2.11e+05 |           NA |  5e+03 |       NA | employment      |
+| 2024-04-11 | USA       | USD      | natural gas storage       | low    | 135935   |  1.40e+10 |    2.40e+10 |     -3.7e+10 | -1e+10 |  6.1e+10 | NA              |
 
 - Note that these data are protected by the
   [copyright](https://www.forexfactory.com/notices#copyrightof) of Fair
