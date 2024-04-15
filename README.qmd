@@ -1,0 +1,41 @@
+---
+title: "Rd3f"
+format: gfm
+---
+
+R code for creating a dataframe out of the [Forex Factory](https://www.forexfactory.com) online economic calendar.
+
+* `build_df` creates or update a dataframe out of Forex Factory HTML source pages.
+* `clean_df` cleans and categorises the data.
+
+
+```{r, message = FALSE}
+source("forex.R")
+```
+
+```{r, warning = FALSE}
+# load the raw dataset generated previously 
+df = read_parquet("data/df_ff_raw.parquet")
+
+# set the dates to scrap from forex factory 
+date_start = "2024-01-01"
+date_end = "2024-04-14"
+
+# update the dataset
+df_updated = build_df(date_start, date_end, df)
+
+# clean the dataset
+df_clean = clean_df(df)
+```
+
+```{r}
+library(dplyr)
+library(knitr)
+
+df_day = df %>%
+  filter(date == "2024-04-11")
+
+kable(df_day, format = "html")
+```
+
+* Note that these data are protected by the [copyright](https://www.forexfactory.com/notices#copyrightof) of Fair Economy, Inc.
