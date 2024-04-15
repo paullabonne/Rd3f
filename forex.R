@@ -24,12 +24,12 @@ gen_dates <- function(date_start, data_end) {
 ############################################################
 ###### creating or updating the dataframe from the html sources
 
-build_df <- function(date_start, data_end, df = NULL, save = TRUE) {
+build_df <- function(date_start, date_end, df = NULL, save = TRUE) {
   # if df is not given a dataset is created, otherwise df is updated
   # only a raw dataset (an output of function build_df()) can be updated.
 
   # generate dates used for html links
-  dates <- gen_dates(date_start, data_end)
+  dates <- gen_dates(date_start, date_end)
 
   if (is.null(df)) {
     df_ff_raw <- c()
@@ -67,7 +67,13 @@ build_df <- function(date_start, data_end, df = NULL, save = TRUE) {
     impact <- elements %>%
       html_elements(".calendar__impact") %>%
       html_elements("span") %>%
-      html_attr("title")
+      html_attr("class")
+    
+    impact = sub(".*-", "", impact)
+
+    impact = str_replace_all(impact, "yel", "low")
+    impact = str_replace_all(impact, "ora", "medium")
+    impact = str_replace_all(impact, "red", "high")
 
     event_id <- elements %>%
       html_attr("data-event-id")

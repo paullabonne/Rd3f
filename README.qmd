@@ -5,29 +5,29 @@ format: gfm
 
 R code for creating a dataframe out of the [Forex Factory](https://www.forexfactory.com) online economic calendar.
 
-* `build_df` creates or update a dataframe out of Forex Factory HTML source pages.
-* `clean_df` cleans and categorises the data.
-
+* `build_df()` creates or update a dataframe out of Forex Factory HTML source pages.
+* `clean_df()` cleans and categorises the data.
 
 ```{r, message = FALSE}
 source("forex.R")
 ```
 
 ```{r, warning = FALSE}
-# load the raw dataset generated previously 
+# load the raw dataset generated previously (optional)
 df = read_parquet("data/df_ff_raw.parquet")
 
 # set the dates to scrap from forex factory 
-date_start = "2024-01-01"
-date_end = "2024-04-14"
+date_start = "2024-04-07"
+date_end = "2024-04-11"
 
 # update the dataset
-df_updated = build_df(date_start, date_end, df)
+df_updated = build_df(date_start, date_end, df) # can be left empty if a new dataframe should be created
 
 # clean the dataset
-df_clean = clean_df(df)
+df_clean = clean_df(df_updated)
 ```
 
+#### Snapshot of the dataframe
 ```{r}
 library(dplyr)
 library(knitr)
