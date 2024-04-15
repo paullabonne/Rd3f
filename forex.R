@@ -37,6 +37,8 @@ build_df <- function(date_start, date_end, df = NULL, save = TRUE) {
     df_ff_raw = df
   }
 
+  df_day = list()
+  
   for (i in 1:length(dates)) {
     page_link <- paste0("https://www.forexfactory.com/calendar?day=", dates[i])
 
@@ -78,7 +80,7 @@ build_df <- function(date_start, date_end, df = NULL, save = TRUE) {
     event_id <- elements %>%
       html_attr("data-event-id")
 
-    df_day <- tibble(
+    df_day[[i]] <- tibble(
       currency,
       event,
       forecast,
@@ -89,14 +91,11 @@ build_df <- function(date_start, date_end, df = NULL, save = TRUE) {
     ) %>%
       mutate(date = as.Date(dates[i], format = "%b%d.%Y"))
 
-    df_ff_raw <- rbind(
-      df_ff_raw,
-      df_day
-    )
-
     # show progress
     print(paste(as.character(as.Date(dates[i], format = "%b%d.%Y")), "scraped"))
   }
+
+  df_ff_raw = bind_rows(df_day)
 
   # remove duplicates
   df_ff_raw %<>%

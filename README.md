@@ -20,7 +20,7 @@ date_start = "2024-04-07"
 date_end = "2024-04-11"
 
 # update the dataset
-df_updated = build_df(date_start, date_end, df) # can be left empty if a new dataframe should be created
+df_updated = build_df(date_start, date_end, df) # df can be left empty if a new dataframe should be created
 ```
 
     [1] "2024-04-07 scraped"

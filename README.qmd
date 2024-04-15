@@ -21,7 +21,7 @@ date_start = "2024-04-07"
 date_end = "2024-04-11"
 
 # update the dataset
-df_updated = build_df(date_start, date_end, df) # can be left empty if a new dataframe should be created
+df_updated = build_df(date_start, date_end, df) # df can be left empty if a new dataframe should be created
 
 # clean the dataset
 df_clean = clean_df(df_updated)
