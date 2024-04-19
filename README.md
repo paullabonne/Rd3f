@@ -3,7 +3,7 @@
 R code for creating a dataframe out of the [Forex
 Factory](https://www.forexfactory.com) online economic calendar.
 
-- `build_df()` creates or update a dataframe out of Forex Factory HTML
+- `build_df()` creates or updates a dataframe out of Forex Factory HTML
   source pages.
 - `clean_df()` cleans and categorises the data.
 
